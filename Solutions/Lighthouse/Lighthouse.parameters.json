@@ -1,0 +1,60 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "mspOfferName": {
+            "value": "CosmicCubicle Internal Services"
+        },
+        "mspOfferDescription": {
+            "value": "CosmicCubicle Internal Services"
+        },
+        "authorizations": {
+            "value": [ 
+                { 
+                    "principalId": "eed74f2c-c1d5-4e58-99ae-b9a5e0915f9c", 
+                    "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                    "principalIdDisplayName": "JERAD BERHOW" 
+                }, 
+                { 
+                    "principalId": "7c3dccc0-02c1-4d47-af8a-12a4ca38ab90", 
+                    "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                    "principalIdDisplayName": "Lighthouse_Contributor" 
+                }, 
+                { 
+                    "principalId": "bc850bd7-3581-46f4-b100-90bb6ddd8dfd", 
+                    "roleDefinitionId": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                    "principalIdDisplayName": "Lighthouse_Reader" 
+                }, 
+                { 
+                    "principalId": "90b42f27-a319-4331-b3e3-695cdc8e6c52", 
+                    "roleDefinitionId": "9b7fa17d-e63e-47b0-bb0a-15c516ac86ec",
+                    "principalIdDisplayName": "Lighthouse_DatabaseContributor" 
+                }, 
+                { 
+                    "principalId": "eef909e7-6ca2-4af2-b961-fc8746ee8dd1", 
+                    "roleDefinitionId": "f25e0fa2-a7c8-4377-a976-54943a77a395",
+                    "principalIdDisplayName": "Lighthouse_KeyVaultAdministrator" 
+                }, 
+                { 
+                    "principalId": "b803c42f-8501-4f32-a7fe-268c18f634e3", 
+                    "roleDefinitionId": "4d97b98b-1d4f-4787-a291-c67834d212e7",
+                    "principalIdDisplayName": "Lighthouse_NetworkContributor" 
+                }, 
+                { 
+                    "principalId": "d2690502-b8dc-4efc-811e-b900c45a9237", 
+                    "roleDefinitionId": "9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+                    "principalIdDisplayName": "Lighthouse_VmContributor" 
+                }, 
+                {
+                    "principalId": "f9681965-c15d-40ef-9d0b-320449f0522f",
+                    "principalIdDisplayName": "Lighthouse_Automation",
+                    "roleDefinitionId": "18d7d88d-d35e-4fb5-a5c3-7773c20a72d9",
+                    "delegatedRoleDefinitionIds": [
+                        "b24988ac-6180-42a0-ab88-20f7382dd24c",
+                        "92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+                    ]
+                }
+                    ]
+                }                
+        }
+}
