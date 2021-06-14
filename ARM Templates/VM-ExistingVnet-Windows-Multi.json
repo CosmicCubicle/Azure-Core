@@ -1,0 +1,123 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string",
+            "defaultValue": "Web"
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2s"
+        },
+        "vnetRG": {
+            "type": "string",
+            "defaultValue": "Cosmic_Core_Net"
+        },
+        "vnetName": {
+            "type": "string",
+            "defaultValue": "vnetCore"
+        },
+        "subnetName": {
+            "type": "string",
+            "defaultValue": "Core"
+        },        
+        "vmCount": {
+            "type": "int",
+            "defaultValue": 3
+        },
+        "adminUser": {
+            "type": "secureString",
+            "defaultValue": "Watson"
+        },
+        "adminPassword": {
+            "type": "secureString"
+        }
+    },
+    "variables": {
+        "vnetId": "[resourceId(parameters('vnetRG'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat('nic',parameters('vmName'),if(greater(copyIndex(1),9),copyindex(1),concat('0',copyIndex(1))))]",
+            "copy": {
+                "name": "nic-loop",
+                "count": "[parameters('vmCount')]",
+                "mode": "Parallel"
+            },
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat('vm',parameters('vmName'),if(greater(copyIndex(1),9),copyindex(1),concat('0',copyIndex(1))))]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "vm-loop",
+                "count": "[parameters('vmCount')]",
+                "mode": "Parallel"
+            },
+            "dependsOn": [
+                "[concat('nic',parameters('vmName'),if(greater(copyIndex(1),9),copyindex(1),concat('0',copyIndex(1))))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat('nic',parameters('vmName'),if(greater(copyIndex(1),9),copyindex(1),concat('0',copyIndex(1)))))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[concat('vm',parameters('vmName'),if(greater(copyIndex(1),9),copyindex(1),concat('0',copyIndex(1))))]",
+                    "adminUsername": "[parameters('adminUser')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUser')]"
+        }
+    }
+}
