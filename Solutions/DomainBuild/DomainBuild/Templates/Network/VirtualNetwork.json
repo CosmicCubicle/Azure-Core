@@ -1,0 +1,116 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "NetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Virtual Network."
+      }
+    },
+    "Region": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the resources."
+      }
+    },
+    "NetworkAddressSpace": {
+      "type": "string",
+      "metadata": {
+        "description": "The CIDR block of the Network."
+      }
+    },
+    "DomainSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "ToolsSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "BackendSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "WebSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "JumpSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "GatewaySubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    }
+  },
+  "variables": {
+
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[concat(parameters('NetworkName'))]",
+      "apiVersion": "2017-06-01",
+      "location": "[parameters('Region')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('NetworkAddressSpace')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "subDC",
+            "properties": {
+              "addressPrefix": "[parameters('DomainSubNet')]",
+            }
+          },
+          {
+            "name": "subTools",
+            "properties": {
+              "addressPrefix": "[parameters('ToolsSubNet')]",
+            }
+          },
+          {
+            "name": "subBackend",
+            "properties": {
+              "addressPrefix": "[parameters('BackendSubNet')]",
+            }
+          },
+          {
+            "name": "subWeb",
+            "properties": {
+              "addressPrefix": "[parameters('WebSubNet')]",
+            }
+          },
+          {
+            "name": "subJump",
+            "properties": {
+              "addressPrefix": "[parameters('JumpSubNet')]",
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "[parameters('GateWaySubnet')]"
+            }
+          }
+        ]
+      }
+    }
+  ]
+  }

@@ -1,0 +1,454 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ResLocation": {
+      "type": "string",
+      "defaultValue": "East US 2",
+      "metadata": {
+        "description": "Region for resources to be created i"
+      }
+    },
+    "Cloud": {
+      "type": "string",
+      "defaultValue": "ZUS",
+      "maxLength": 3,
+      "minLength": 3,
+      "metadata": {
+        "description": "Root name for DCs."
+      }
+    },
+    "Region": {
+      "type": "string",
+      "defaultValue": "E2",
+      "maxLength": 2,
+      "minLength": 2,
+      "metadata": {
+        "description": "Root name for DCs."
+      }
+    },
+    "Environment": {
+      "type": "string",
+      "defaultValue": "D1",
+      "maxLength": 2,
+      "minLength": 2,
+      "metadata": {
+        "description": "Root name for DCs."
+      }
+    },
+    "Application": {
+      "type": "string",
+      "defaultValue": "Dev",
+      "maxLength": 3,
+      "minLength": 3,
+      "metadata": {
+        "description": "Root name for DCs."
+      }
+    },
+    "Role": {
+      "type": "string",
+      "defaultValue": "DC",
+      "maxLength": 2,
+      "minLength": 2,
+      "metadata": {
+        "description": "Root name for DCs."
+      }
+    },
+    "InstanceCount": {
+      "type": "int",
+      "defaultValue": 2,
+      "maxValue": 999,
+      "minValue": 1,
+      "metadata": {
+        "description": "Number of instances to create"
+      }
+    },
+    "DomainName": {
+      "type": "string",
+      "defaultValue": "CosmicCubicle.org",
+      "metadata": {
+        "description": "Name of the Domain to create."
+      }
+    },
+    "PrimaryDCIP": {
+      "type": "string",
+      "defaultValue": "10.5.5.4",
+      "metadata": {
+        "description": "IP of the Primary DC."
+      }
+    },
+    "SecondaryDCIP": {
+      "type": "string",
+      "defaultValue": "10.5.5.5",
+      "metadata": {
+        "description": "IP of the Secondary DC."
+      }
+    },
+    "DomainAdmin": {
+      "type": "string",
+      "defaultValue": "CosmicAdmin",
+      "metadata": {
+        "description": "Name of local Admin Account"
+      }
+    },
+    "DomainSecretValue": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password that will be created int he vault for the Domain Admin Account, must be at least 12 characters."
+      },
+      "minLength": 12
+    },
+    "MachineClass": {
+      "type": "string",
+      "defaultValue": "Standard_DS12_v2",
+      "metadata": {
+        "description": "The size of the Azure Virtual Machines."
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Name fo the network."
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "string",
+      "metadata": {
+        "description": "SaS Token to access resources."
+      }
+    }
+  },
+  "variables": {
+    "RootName": "[concat(parameters('Cloud'),parameters('Region'),parameters('Environment'))]",
+    "RootVmName": "[concat(parameters('Cloud'),parameters('Region'),parameters('Environment'),parameters('Application'),parameters('Role'))]",
+
+    "NetworkPrefix": "vnet",
+    "NetworkName": "[concat(variables('NetworkPrefix'), variables('RootName'))]",
+    "NetworkSpace": "10.5.5",
+    "NetworkAddressSpace": "[concat(variables('NetworkSpace'),'.0/24')]",
+    "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('NetworkName'))]",
+    "DomainID": "[concat(variables('VnetID'),'/subnets/subDC')]",
+    "adSubnetRef": "[concat(variables('VnetID'),'/subnets/',variables('DomainSubNet'))]",
+    "NicPrefix": "nic",
+    "DomainSubNet": "[concat(variables('NetworkSpace'),'.0/28')]",
+    "ToolsSubNet": "[concat(variables('NetworkSpace'),'.32/27')]",
+    "BackendSubNet": "[concat(variables('NetworkSpace'),'.64/27')]",
+    "WebSubNet": "[concat(variables('NetworkSpace'),'.96/27')]",
+    "JumpSubNet": "[concat(variables('NetworkSpace'),'.160/28')]",
+    "GateWaySubnet": "[concat(variables('NetworkSpace'),'.240/28')]",
+    "NetworkSecurityPrefix": "nsg",
+    "DomainSecurity": "[concat(variables('NetworkSecurityPrefix'),'Domain')]",
+    "ToolsSecurity": "[concat(variables('NetworkSecurityPrefix'),'Tools')]",
+    "BackendSecurity": "[concat(variables('NetworkSecurityPrefix'),'Backend')]",
+    "WebSecurity": "[concat(variables('NetworkSecurityPrefix'),'Web')]",
+    "JumpSecurity": "[concat(variables('NetworkSecurityPrefix'),'Jump')]",
+    "GatewaySecurity": "[concat(variables('NetworkSecurityPrefix'),'Gateway')]",
+    "PrimaryDCNicName": "[concat('nic', variables('RootVmName'), '001')]",
+    "SecondaryDCNicName": "[concat('nic', variables('RootVmName'), '002')]",
+
+    "PrimaryDCModulesURL": "[concat(parameters('_artifactsLocation'),'/CreateADPDC.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "PrimaryDCConfigurationFunction": "createadpdc.ps1\\CreateADPDC",
+    "SecondaryDCModulesURL": "[concat(parameters('_artifactsLocation'),'/CreateADBDC.ps1.zip',parameters('_artifactsLocationSasToken'))]",
+    "SecondaryDCConfigurationFunction": "createadbdc.ps1\\CreateADBDC",
+
+    "PrimaryDCVMName": "[concat(variables('RootVmName'), '001')]",
+    "SecondaryDCVMName": "[concat(variables('RootVmName'),'002')]",
+    "VMPrefix": "vm",
+    "SysVolName": "SysVol",
+
+    "ImagePublisher": "MicrosoftWindowsServer",
+    "ImageOffer": "WindowsServer",
+    "ImageSKU": "2016-Datacenter",
+    "ImageVersion": "latest",
+
+    "StorageType": "Standard_LRS",
+    "DiagStorageType": "Standard_LRS"
+
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "VnetCreation",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'),'/Network/VirtualNetwork.json',parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "NetworkName": { "value": "[variables('NetworkName')]" },
+          "Region": { "value": "[parameters('ResLocation')]" },
+          "NetworkAddressSpace": { "value": "[variables('NetworkAddressSpace')]" },
+          "DomainSubNet": { "value": "[variables('DomainSubNet')]" },
+          "ToolsSubNet": { "value": "[variables('ToolsSubNet')]" },
+          "BackendSubNet": { "value": "[variables('BackendSubNet')]" },
+          "WebSubNet": { "value": "[variables('WebSubNet')]" },
+          "JumpSubNet": { "value": "[variables('JumpSubNet')]" },
+          "GatewaySubNet": { "value": "[variables('GateWaySubnet')]" }
+        }
+      }
+    },
+    {
+      "name": "[variables('PrimaryDCNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[parameters('ResLocation')]",
+      "apiVersion": "2017-06-01",
+      "dependsOn": [
+        "VnetCreation"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('PrimaryDCIP')]",
+              "subnet": {
+                "id": "[variables('DomainID')]"
+              }
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": true
+      }
+    },
+    {
+      "name": "[variables('SecondaryDCNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[parameters('ResLocation')]",
+      "apiVersion": "2017-06-01",
+      "dependsOn": [
+        "VnetCreation"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('SecondaryDCIP')]",
+              "subnet": {
+                "id": "[variables('DomainID')]"
+              }
+            }
+          }
+        ],
+        "enableAcceleratedNetworking": true
+      }
+    },
+    {
+      "apiVersion": "2017-03-30",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('PrimaryDCVMName')]",
+      "dependsOn": [
+        "[variables('PrimaryDCNicName')]"
+      ],
+      "location": "[parameters('ResLocation')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('MachineClass')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('PrimaryDCVMName')]",
+          "adminUsername": "[parameters('DomainAdmin')]",
+          "adminPassword": "[parameters('DomainSecretValue')]",
+          "windowsConfiguration": {
+            "timeZone": "Central Standard Time"
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('ImagePublisher')]",
+            "offer": "[variables('ImageOffer')]",
+            "sku": "[variables('ImageSKU')]",
+            "version": "[variables('ImageVersion')]"
+          },
+          "osDisk": {
+            "name": "[concat(variables('PrimaryDCVMName'),'OS')]",
+            "managedDisk": {
+              "storageAccountType": "[variables('StorageType')]"
+            },
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "createOption": "Empty",
+              "lun": 0,
+              "diskSizeGB": 100,
+              "caching": "None",
+              "name": "[concat(variables('PrimaryDCVMName'),'-data')]",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('PrimaryDCNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "type": "extensions",
+          "name": "CreateADForest",
+          "apiVersion": "2017-03-30",
+          "location": "[parameters('ResLocation')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', variables('PrimaryDCVMName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.19",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[variables('PrimaryDCModulesURL')]",
+              "configurationFunction": "[variables('PrimaryDCConfigurationFunction')]",
+              "Properties": {
+                "DomainName": "[parameters('DomainName')]",
+                "AdminCreds": {
+                  "UserName": "[parameters('DomainAdmin')]",
+                  "Password": "PrivateSettingsRef:AdminPassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "AdminPassword": "[parameters('DomainSecretValue')]"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "VnetDnsUpdate",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/',variables('PrimaryDCVMName'), '/extensions/CreateADForest')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'),'/Network/VirtualNetworkDNS.json',parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "NetworkName": { "value": "[variables('NetworkName')]" },
+          "Region": { "value": "[parameters('ResLocation')]" },
+          "NetworkAddressSpace": { "value": "[variables('NetworkAddressSpace')]" },
+          "DomainSubNet": { "value": "[variables('DomainSubNet')]" },
+          "ToolsSubNet": { "value": "[variables('ToolsSubNet')]" },
+          "BackendSubNet": { "value": "[variables('BackendSubNet')]" },
+          "WebSubNet": { "value": "[variables('WebSubNet')]" },
+          "JumpSubNet": { "value": "[variables('JumpSubNet')]" },
+          "GatewaySubNet": { "value": "[variables('GateWaySubnet')]" },
+          "PrimaryDCIP": { "value": "[parameters('PrimaryDCIP')]" },
+          "SecondaryDCIP": { "value": "[parameters('SecondaryDCIP')]" },
+          "DomainSecurity": { "value": "[variables('GateWaySubnet')]" },
+          "ToolsSecurity": { "value": "[variables('GateWaySubnet')]" },
+          "BackendSecurity": { "value": "[variables('GateWaySubnet')]" },
+          "WebSecurity": { "value": "[variables('GateWaySubnet')]" },
+          "JumpSecurity": { "value": "[variables('GateWaySubnet')]" }
+        }
+      }
+    },
+        {
+      "apiVersion": "2017-03-30",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('SecondaryDCVMName')]",
+      "dependsOn": [
+        "VnetDNSUpdate"
+      ],
+      "location": "[parameters('ResLocation')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('MachineClass')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('SecondaryDCVMName')]",
+          "adminUsername": "[parameters('DomainAdmin')]",
+          "adminPassword": "[parameters('DomainSecretValue')]",
+          "windowsConfiguration": {
+            "timeZone": "Central Standard Time"
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('ImagePublisher')]",
+            "offer": "[variables('ImageOffer')]",
+            "sku": "[variables('ImageSKU')]",
+            "version": "[variables('ImageVersion')]"
+          },
+          "osDisk": {
+            "name": "[concat(variables('SecondaryDCVMName'),'OS')]",
+            "managedDisk": {
+              "storageAccountType": "[variables('StorageType')]"
+            },
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "createOption": "Empty",
+              "lun": 0,
+              "diskSizeGB": 100,
+              "caching": "None",
+              "name": "[concat(variables('SecondaryDCVMName'),'-data')]",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('SecondaryDCNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "type": "extensions",
+          "name": "CreateBDC",
+          "apiVersion": "2017-03-30",
+          "location": "[parameters('ResLocation')]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('SecondaryDCVMName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', variables('PrimaryDCVMName'),'/extensions/CreateADForest')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.2",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "ModulesUrl": "[variables('SecondaryDCModulesURL')]",
+              "ConfigurationFunction": "[variables('SecondaryDCConfigurationFunction')]",
+              "Properties": {
+                "DomainName": "[parameters('DomainName')]",
+                "DnsServer": "[parameters('PrimaryDCIP')]",
+                "AdminCreds": {
+                  "UserName": "[parameters('DomainAdmin')]",
+                  "Password": "PrivateSettingsRef:AdminPassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "AdminPassword": "[parameters('DomainSecretValue')]"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

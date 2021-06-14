@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "DomainBuild", "DomainBuild\DomainBuild.deployproj", "{54D073C6-5CD9-4670-B4CB-F71E2112613A}"
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "DSC Scripting Project", "DSC Scripting Project\DSC Scripting Project.deployproj", "{E478738D-336A-4C0B-85FA-B13E2C3050B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54D073C6-5CD9-4670-B4CB-F71E2112613A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54D073C6-5CD9-4670-B4CB-F71E2112613A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54D073C6-5CD9-4670-B4CB-F71E2112613A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54D073C6-5CD9-4670-B4CB-F71E2112613A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E478738D-336A-4C0B-85FA-B13E2C3050B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E478738D-336A-4C0B-85FA-B13E2C3050B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E478738D-336A-4C0B-85FA-B13E2C3050B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E478738D-336A-4C0B-85FA-B13E2C3050B0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D43270B-2749-4F0F-AB03-7956A035E908}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 1
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://cosmiccubiclecode.visualstudio.com/
+		SccProjectUniqueName0 = DomainBuild\\DomainBuild.deployproj
+		SccProjectName0 = DomainBuild
+		SccAuxPath0 = https://cosmiccubiclecode.visualstudio.com
+		SccLocalPath0 = DomainBuild
+		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+	EndGlobalSection
+EndGlobal

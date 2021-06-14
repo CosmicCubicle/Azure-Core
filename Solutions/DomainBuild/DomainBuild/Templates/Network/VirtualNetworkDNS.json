@@ -1,0 +1,164 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "NetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Virtual Network."
+      }
+    },
+    "Region": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the resources."
+      }
+    },
+    "NetworkAddressSpace": {
+      "type": "string",
+      "metadata": {
+        "description": "The CIDR block of the Network."
+      }
+    },
+    "PrimaryDCIP": {
+      "type": "string",
+      "metadata": {
+        "description": "IP for the primary Domain Controller."
+      }
+    },
+    "SecondaryDCIP": {
+      "type": "string",
+      "metadata": {
+        "description": "IP for the Secondary Domain controller."
+      }
+    },
+    "DomainSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "ToolsSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "BackendSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "WebSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "JumpSubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "GatewaySubNet": {
+      "type": "string",
+      "metadata": {
+        "description": "CIDR block for the named subnet."
+      }
+    },
+    "DomainSecurity": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of NSG for the Domain Subnet."
+      }
+    },
+    "ToolsSecurity": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of NSG for the Tools Subnet."
+      }
+    },
+    "BackendSecurity": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of NSG for the Backend Subnet."
+      }
+    },
+    "WebSecurity": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of NSG for the Web Subnet."
+      }
+    },
+    "JumpSecurity": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of NSG for the Jump Subnet."
+      }
+    }
+  },
+  "variables": {
+
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[concat(parameters('NetworkName'))]",
+      "apiVersion": "2017-06-01",
+      "location": "[parameters('Region')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('NetworkAddressSpace')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": [
+            "[parameters('PrimaryDCIP')]",
+            "[parameters('SecondaryDCIP')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "subDC",
+            "properties": {
+              "addressPrefix": "[parameters('DomainSubNet')]"
+            }
+          },
+          {
+            "name": "subTools",
+            "properties": {
+              "addressPrefix": "[parameters('ToolsSubNet')]"
+            }
+          },
+          {
+            "name": "subBackend",
+            "properties": {
+              "addressPrefix": "[parameters('BackendSubNet')]"
+            }
+          },
+          {
+            "name": "subWeb",
+            "properties": {
+              "addressPrefix": "[parameters('WebSubNet')]"
+            }
+          },
+          {
+            "name": "subJump",
+            "properties": {
+              "addressPrefix": "[parameters('JumpSubNet')]"
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "[parameters('GateWaySubnet')]"
+            }
+          }
+        ]
+      }
+    }
+  ]
+  }

@@ -1,0 +1,50 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ResLocation": {
+      "value": "West Central US"
+    },
+    "Cloud": {
+      "value": "ZUS"
+    },
+    "Region": {
+      "value": "WC"
+    },
+    "Environment": {
+      "value": "D1"
+    },
+    "Application": {
+      "value": "Dev"
+    },
+    "Role": {
+      "value": "DC"
+    },
+    "InstanceCount": {
+      "value": 2
+    },
+    "DomainName": {
+      "value": "CosmicCubicle.org"
+    },
+    "PrimaryDCIP": {
+      "value": "10.5.5.4"
+    },
+    "SecondaryDCIP": {
+      "value": "10.5.5.5"
+    },
+    "DomainAdmin": {
+      "value": "CosmicAdmin"
+    },
+    "DomainSecretValue": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/ccd83f93-c67a-4118-bf1b-6a366f35e0f2/resourceGroups/rgCosmicStaging/providers/Microsoft.KeyVault/vaults/DomainBuild"
+        },
+        "secretName": "DomainAdminPassword"
+      }
+    },
+    "MachineClass": {
+      "value": "Standard_DS4_v2"
+    }
+  }
+}
