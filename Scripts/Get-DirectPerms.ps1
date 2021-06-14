@@ -6,7 +6,7 @@ $Tenant = Get-AzTenant |Select-Object -Property ID, Name | Out-GridView -Title "
 $Ad = Connect-AzureAD -TenantId $Tenant.Id -Credential $AzureCreds
 
 #Create New CSV
-$Outfile = "C:\temp\Permissions.csv"
+$Outfile = "C:\temp\Permissions1.csv"
 $csvfile={} 
 
 #Check For Assignments at Management Group Level
