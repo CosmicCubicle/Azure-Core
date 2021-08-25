@@ -11,11 +11,6 @@
         "authorizations": {
             "value": [ 
                 { 
-                    "principalId": "eed74f2c-c1d5-4e58-99ae-b9a5e0915f9c", 
-                    "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-                    "principalIdDisplayName": "JERAD BERHOW" 
-                }, 
-                { 
                     "principalId": "7c3dccc0-02c1-4d47-af8a-12a4ca38ab90", 
                     "roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
                     "principalIdDisplayName": "Lighthouse_Contributor" 

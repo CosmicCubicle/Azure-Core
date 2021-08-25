@@ -6,8 +6,12 @@ $Tenant = Get-AzTenant |Select-Object -Property ID, Name | Out-GridView -Title "
 $Ad = Connect-AzureAD -TenantId $Tenant.Id -Credential $AzureCreds
 
 #Create New CSV
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 $Outfile = "C:\temp\Permissions.csv"
+=======
+$Outfile = "C:\temp\Permissions1.csv"
+>>>>>>> 90cc04190d762a4280ecad0d63deecf9f770ea44
 $csvfile={} 
 =======
 $Outfile = "C:\temp\Permissions1.csv"
