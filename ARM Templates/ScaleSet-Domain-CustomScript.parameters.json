@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmSku": {
+            "value": "Standard_F8s_v2"
+        },
+        "instanceCount": {
+            "value": 3
+        },
+        "singlePlacementGroup": {
+            "value": true
+        },
+        "adminUsername": {
+            "value": "itadmin"
+        },
+        "adminPassword": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/56647250-525e-4bdb-b5dc-1b05ef4e645e/resourceGroups/KeyVault/providers/Microsoft.KeyVault/vaults/AlphadyneMainKeyVault"
+                        },
+                        "secretName": "itadmin"
+                    }
+        },
+        "_artifactsLocation": {
+            "value": "https://tsrscripts.blob.core.windows.net/"
+        },
+        "_artifactsLocationSasToken": {
+            "value": ""
+        },
+        "location": {
+            "value": "EastUS"
+        },
+        "platformFaultDomainCount": {
+            "value": 1
+        },
+        "domainJoinPassword": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/56647250-525e-4bdb-b5dc-1b05ef4e645e/resourceGroups/KeyVault/providers/Microsoft.KeyVault/vaults/AlphadyneMainKeyVault"
+                        },
+                        "secretName": "sysopssvc"
+                    }
+        }
+    }
+}

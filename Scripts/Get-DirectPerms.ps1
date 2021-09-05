@@ -6,8 +6,17 @@ $Tenant = Get-AzTenant |Select-Object -Property ID, Name | Out-GridView -Title "
 $Ad = Connect-AzureAD -TenantId $Tenant.Id -Credential $AzureCreds
 
 #Create New CSV
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+$Outfile = "C:\temp\Permissions.csv"
+=======
 $Outfile = "C:\temp\Permissions1.csv"
+>>>>>>> 90cc04190d762a4280ecad0d63deecf9f770ea44
 $csvfile={} 
+=======
+$Outfile = "C:\temp\Permissions1.csv"
+$csvfile=@{} 
+>>>>>>> Stashed changes
 
 #Check For Assignments at Management Group Level
 $Groups = Get-AzManagementGroup
@@ -18,11 +27,11 @@ foreach($Group in $Groups)
 
     Foreach($RBAC in $RBACs)
     {
-        $csvfile.Scope = $Group.Id
-        $csvfile.SignInName = $RBACs.SignInName
-        $csvfile.RoleDefinitionName = $RBAC.RoleDefinitionName
-        $csvfile.ObjectType = $RBAC.ObjectType
-        $csvfile.ObjectId = $RBAC.ObjectId
+        $csvfile |Add-Member -MemberType NoteProperty -Name 'Scope' -Value $Group.Id
+        $csvfile |Add-Member -MemberType NoteProperty -Name 'SignInName' -Value $RBACs.SignInName
+        $csvfile |Add-Member -MemberType NoteProperty -Name 'RoleDefinitionName' -Value $RBAC.RoleDefinitionName
+        $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectType' -Value $RBAC.ObjectType
+        $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectId' -Value $RBAC.ObjectId
         $csvfile | Export-Csv $Outfile -Append -NoTypeInformation
     }
 }
@@ -34,12 +43,16 @@ foreach($Sub in $Subs)
     $RBACs = Get-AzRoleAssignment | Where-Object {$_.Scope -eq "/"}
     Foreach($RBAC in $RBACs)
     {
-        $csvfile.Scope = "/subscriptions/$($Sub.id)"
-        $csvfile.SignInName = $RBACs.SignInName
-        $csvfile.RoleDefinitionName = $RBAC.RoleDefinitionName
-        $csvfile.ObjectType = $RBAC.ObjectType
-        $csvfile.ObjectId = $RBAC.ObjectId
-        $csvfile | Export-Csv $Outfile -Append -NoTypeInformation
+        $csvfile = Import-Csv -Path $Outfile
+        foreach($csvfile in $csv)
+        {
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'Scope' -Value "/subscriptions/$($Sub.id)"
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'SignInName' -Value $RBACs.SignInName
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'RoleDefinitionName' -Value $RBAC.RoleDefinitionName
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectType' -Value $RBAC.ObjectType
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectId' -Value $RBAC.ObjectId
+            $csv | Export-Csv $Outfile -Append -NoTypeInformation
+        }
     }
 
     $RGs = Get-AzResourceGroup
@@ -48,11 +61,11 @@ foreach($Sub in $Subs)
         $RBACs = Get-AzRoleAssignment | Where-Object {$_.Scope -eq "/"}
         Foreach($RBAC in $RBACs)
         {
-            $csvfile.Scope = $RG.ResourceId
-            $csvfile.SignInName = $RBACs.SignInName
-            $csvfile.RoleDefinitionName = $RBAC.RoleDefinitionName
-            $csvfile.ObjectType = $RBAC.ObjectType
-            $csvfile.ObjectId = $RBAC.ObjectId
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'Scope' -Value $RG.ResourceId
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'SignInName' -Value $RBACs.SignInName
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'RoleDefinitionName' -Value $RBAC.RoleDefinitionName
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectType' -Value $RBAC.ObjectType
+            $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectId' -Value $RBAC.ObjectId    
             $csvfile | Export-Csv $Outfile -Append -NoTypeInformation
         }
         
@@ -62,11 +75,11 @@ foreach($Sub in $Subs)
             $RBACs = Get-AzRoleAssignment | Where-Object {$_.Scope -eq "/"}
             Foreach($RBAC in $RBACs)
             {
-                $csvfile.Scope = $Resource.ResourceId
-                $csvfile.SignInName = $RBACs.SignInName
-                $csvfile.RoleDefinitionName = $RBAC.RoleDefinitionName
-                $csvfile.ObjectType = $RBAC.ObjectType
-                $csvfile.ObjectId = $RBAC.ObjectId
+                $csvfile |Add-Member -MemberType NoteProperty -Name 'Scope' -Value $Resource.ResourceId
+                $csvfile |Add-Member -MemberType NoteProperty -Name 'SignInName' -Value $RBACs.SignInName
+                $csvfile |Add-Member -MemberType NoteProperty -Name 'RoleDefinitionName' -Value $RBAC.RoleDefinitionName
+                $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectType' -Value $RBAC.ObjectType
+                $csvfile |Add-Member -MemberType NoteProperty -Name 'ObjectId' -Value $RBAC.ObjectId        
                 $csvfile | Export-Csv $Outfile -Append -NoTypeInformation
             }   
         }
