@@ -18,7 +18,6 @@ Select-MgProfile "beta"
 #Get Access Reviews
 $Reviews = (Invoke-MgGraphRequest -Uri "beta/identityGovernance/accessReviews/definitions" -OutputType PSObject).value
 $Reviews | FT displayName,id
-
 foreach ($Review in $Reviews) {
     Invoke-MgGraphRequest -Method Delete -Uri "https://graph.microsoft.com/beta/identityGovernance/accessReviews/definitions/$($Review.id)"
 }
