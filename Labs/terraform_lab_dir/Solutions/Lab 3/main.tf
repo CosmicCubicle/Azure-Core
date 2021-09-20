@@ -1,11 +1,11 @@
 provider "azurerm" {
-    skip_provider_registration = true
-	features {
-	}
-   }
+  skip_provider_registration = true
+  features {
+  }
+}
 
 data "azurerm_resource_group" "main" {
-  name     = var.rg_name
+  name = var.rg_name
 }
 
 data "azurerm_client_config" "current" {
@@ -38,12 +38,12 @@ resource "random_id" "storage_account" {
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                        = "kviac${lower(random_id.storage_account.hex)}"
-  location                    = data.azurerm_resource_group.main.location
-  resource_group_name         = data.azurerm_resource_group.main.name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  name                = "kviac${lower(random_id.storage_account.hex)}"
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
 
-  sku_name = "standard"                
+  sku_name = "standard"
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
@@ -70,7 +70,7 @@ resource "azurerm_key_vault_secret" "secret" {
   name         = "terraform"
   value        = azurerm_storage_account.storage.primary_access_key
   key_vault_id = azurerm_key_vault.vault.id
-  depends_on = [azurerm_storage_account.storage]
+  depends_on   = [azurerm_storage_account.storage]
 }
 
 resource "azurerm_storage_container" "terraformstate" {

@@ -35,4 +35,4 @@ variable "admin_pw_name" {
   type        = string
   description = "the admin password of the vm"
   default     = "admin-pw"
-   }
+}

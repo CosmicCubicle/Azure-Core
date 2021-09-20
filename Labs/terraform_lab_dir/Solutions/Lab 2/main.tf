@@ -1,11 +1,11 @@
 provider "azurerm" {
-    skip_provider_registration = true
-	features {
-	}
-   }
+  skip_provider_registration = true
+  features {
+  }
+}
 
 data "azurerm_resource_group" "main" {
-  name     = var.rg_name
+  name = var.rg_name
 }
 
 resource "azurerm_public_ip" "vm" {

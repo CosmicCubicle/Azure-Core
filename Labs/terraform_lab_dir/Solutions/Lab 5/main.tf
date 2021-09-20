@@ -8,7 +8,7 @@ terraform {
 provider "azurerm" {
 }
 
-  
+
 
 locals {
   vm = {
